@@ -52,7 +52,7 @@ public class Grille implements Serializable {
         }
     }
 
-    void upadteGrilleStartingFrom(String coord){
+    void upadteGrilleStartingFrom(String coord) throws FormuleCycliqueException {
         Cell cell = getCell(coord);
         if (cell.getFormule() != null) cell.updateCell();
 
@@ -62,30 +62,45 @@ public class Grille implements Serializable {
     }
 
 
-    void editCell(String coord,double newValue){
+    void editCell(String coord,double newValue) throws FormuleCycliqueException {
         Cell cell = getCell(coord);
         cell.makeCellNotNull();
         //! we can only edit the value of a cell if it's not a formula
         if (cell.getFormule() == null){
             cell.setValeur(newValue);
+            upadteGrilleStartingFrom(coord);
         }
         else System.out.println("Can't edit a cell that has a formula");
         //! we need to update the value of all the cells that depend on this cell
         //! this can be improved by updating the cells in a breadth first search manner
-        upadteGrilleStartingFrom(coord);
     }
-    void editCell(String coord,Formule formule){
+
+    boolean isFormuleCyclique(Formule formule, Cell cell) {
+        if (formule.casesInOperation.contains(cell)) return true;  // cycle direct
+        for (Cell c : formule.casesInOperation) {
+            if (this.cellsGraph.fathersOfRecursive(c).contains(cell) ) return true;   // cycle indirect
+        }
+        return false;
+    }
+    void editCell(String coord,Formule formule) throws FormuleCycliqueException {
         Cell cell = getCell(coord);
-        removeCell(cell);
+
+        if (isFormuleCyclique(formule,cell)) throw new FormuleCycliqueException("cycle detected");
+
+
+//        removeCell(cell);
+        this.cellsGraph.removeIncomingEdges(cell);
 
         cell.makeCellNotNull();
         cell.setFormule(formule);
-        addCell(cell);
+
+//        addCell(cell);
+        addCellEdges(cell);
 
         upadteGrilleStartingFrom(coord);
 
     }
-    void editCell(String coord){
+    void editCell(String coord) throws FormuleCycliqueException {
         Cell cell = getCell(coord);
         //! we can only edit the value of a cell if it's not a formula
         if (cell.getFormule() == null){
@@ -103,6 +118,8 @@ public class Grille implements Serializable {
     void printLvl(List<Cell> lvl, int nb){
         System.out.println("Niveau " + nb + " : ");
         for (Cell cell : lvl) {
+//            List<String> casesInOperation = (cell.getFormule()!=null)?cell.getFormule().casesInOperation.stream().map(Cell::getCoord).toList():new ArrayList<>();
+
             System.out.println("\t\t"+cell );
 //            System.out.println("\t\t"+cell.getCoord() + " : "+ cell.getFormule()+ " = " + cell.getValeur() );
         }

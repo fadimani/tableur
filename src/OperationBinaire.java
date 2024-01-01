@@ -1,19 +1,10 @@
 public abstract class OperationBinaire extends Formule {
 
-
     @Override
     public String toString() {
         String res = "";
-        String operation = this.getClass().toString();
-        operation = operation.split(" ")[1];
 
-        String op = switch (operation) {
-            case "Addition" -> "+";
-            case "Soustraction" -> "-";
-            case "Multiplication" -> "*";
-            case "Division" -> "/";
-            default -> "";
-        };
+        String op = this.getOperation();
 
         if (formulesInOperation.size()==0){
             String case1 = casesInOperation.get(0).colonne + casesInOperation.get(0).ligne;
@@ -33,4 +24,6 @@ public abstract class OperationBinaire extends Formule {
 
         return res;
     }
+
+
 }
