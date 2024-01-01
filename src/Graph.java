@@ -44,9 +44,16 @@ public class Graph implements Serializable {
 
     public void removeEdge(Cell source, Cell destination) {
         List<Cell> eV1 = map.get(source);
-        if (eV1 != null)
-            eV1.remove(destination);
+        if (eV1 != null) eV1.remove(destination);
     }
+
+    public void removeIncomingEdges(Cell destination) {
+        for (Cell source : map.keySet()) {
+            List<Cell> eV1 = map.get(source);
+            if (eV1 != null) eV1.remove(destination);
+        }
+    }
+
 
     // This function gives the count of vertices
     public int getVertexCount() {
@@ -133,6 +140,22 @@ public class Graph implements Serializable {
             }
         }
         if (vertices.size() == 0) return null;
+        return vertices;
+    }
+
+    List<Cell> fathersOfRecursive(Cell node){
+        List<Cell> vertices = new ArrayList<Cell>();
+        for (Cell v : map.keySet()) {
+            for (Cell w : map.get(v)) {
+                if (w.equals(node)){
+                    vertices.add(v);
+                    vertices.addAll(fathersOfRecursive(v));
+                }
+            }
+        }
+        Set<Cell> set = new HashSet<>(vertices);
+        vertices.clear();
+        vertices.addAll(set);
         return vertices;
     }
 

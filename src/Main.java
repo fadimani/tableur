@@ -2,21 +2,7 @@ import java.io.*;
 
 public class Main {
 
-    public static void writeObjectToFile(Grille obj, File file) throws IOException {
-        FileOutputStream fos = new FileOutputStream(file);
-        ObjectOutputStream oos = new ObjectOutputStream(fos);
-        oos.writeObject(obj);
-        oos.flush();
-    }
-    public static Grille readObjectFromFile(File file) throws IOException, ClassNotFoundException {
-        Grille result = null;
-        FileInputStream fis = new FileInputStream(file);
-        ObjectInputStream ois = new ObjectInputStream(fis);
-        result = (Grille) ois.readObject();
-        return result;
-    }
-
-    public static void main(String[] args) throws IOException, ClassNotFoundException {
+    public static void main(String[] args) throws IOException, ClassNotFoundException, FormuleCycliqueException {
 
 
 
@@ -28,31 +14,53 @@ public class Main {
 
         Cell c5 = new Cell("C5", new Addition(a1,b3));
 
-        Cell b4 = new Cell("B4", new Addition(a1,c5));
-//
-        Cell c2 = new Cell("C2", new Addition(b4,c5));
+        Cell b4 = new Cell("B4", new Soustraction(a1,c5));
 
-        Cell e3 = new Cell("E3", new Addition(b3,new Addition(a1,c2)));
-        Cell b6 = new Cell("B6", new Addition(b3,c2));
-//
+        Cell c2 = new Cell("C2", new Division(b4,c5));
+
+        Cell e3 = new Cell("E3", new Addition(new Soustraction(a1,c2),b3));
+        Cell b6 = new Cell("B6", new Multiplication(b3,c2));
+
         Cell c3 = new Cell("C3", new Addition(e3,b3));
-//
+
         Cell d3 = new Cell("D3", new Addition(c1,c3));
 
+        Cell d4 = new Cell("D4", new Somme(a1,a1,a1,a1,a1,a1));
+        Cell d5 = new Cell("D5", new Moyenne(a1,a1,a1,a1,a1,a1));
 
-        g.addAllCells(a1,c1,b3,c5,b4,c2);
-//        g.addAllCells(a1,c1,b3,c3,d3);
 
+        g.addAllCells(a1,c1,b3,c5,b4,c2,e3,b6,c3,d3,d4,d5);
 
         g.showAllCellsTopologicalOrder();
 
         System.out.println("---------------------------------------------------");
 
-        g.editCell("B4", new Addition(a1,c1));
+        try {
+            g.editCell("A1", new Addition(b3, new Addition(a1, a1)));
+        } catch (FormuleCycliqueException e) {
+            System.out.println(e.getMessage());
+        }
+
+
+        try {
+            g.editCell("C5", new Addition(b3, new Addition(b6, a1)));
+        } catch (FormuleCycliqueException e) {
+            System.out.println(e.getMessage());
+        }
+
         g.showAllCellsTopologicalOrder();
 
-        System.out.println(c2);
-        System.out.println(b4.getValeur());
+        System.out.println("---------------------------------------------------");
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -34,19 +34,24 @@ public class Cell implements Serializable, Comparable<Cell> {
 
     }
 
-    public void setFormule(Formule formule){
+
+
+    public void setFormule(Formule formule) throws FormuleCycliqueException {
+        if (formule.casesInOperation.contains(this)) throw new FormuleCycliqueException("La formule ne peut pas contenir la cellule qu'elle est censée modifier");
+
         this.formule = formule;
-        if (formule == null) setValeur(0);
-        else {
-            for (Cell cell : formule.casesInOperation) {
-                if(cell.isNullCell){
-                    this.makeCellNull();
-                    return;
-                }
+
+        for (Cell cell : formule.casesInOperation) {
+            if(cell.isNullCell){
+                this.makeCellNull();
+                return;
             }
-            setValeur(formule.eval());
         }
+
+        setValeur(formule.eval());
+
     }
+
 
     public Formule getFormule(){
         return this.formule;
@@ -75,25 +80,25 @@ public class Cell implements Serializable, Comparable<Cell> {
         this.makeCellNull();
     }
 
-    public Cell(String coord, Formule formule) {
+    public Cell(String coord, Formule formule) throws FormuleCycliqueException {
         this.colonne = AppTest.convertStringColonne(coord);
         this.ligne = AppTest.convertStringLigne(coord);
         setFormule(formule);
     }
 
-    public void updateCell(){
-        setValeur(formule.eval());
+    public void updateCell() throws FormuleCycliqueException {
+        setFormule(this.formule);
+
 
         for (Cell cell : formule.casesInOperation) {
             if(cell.isNullCell){
                 this.makeCellNull();
-                System.out.println("made cell null "+this.getCoord());
-                System.out.println("cell updated "+this.getCoord());
+
                 return;
             }
+
         }
         this.makeCellNotNull();
-        System.out.println("cell updated "+this.getCoord());
     }
 
 
@@ -116,6 +121,7 @@ public class Cell implements Serializable, Comparable<Cell> {
         String value = (this.isNullCell)? "NULL" : String.valueOf(this.getValeur());
         if (this.getFormule() == null) return this.getCoord() +  " : " + value ;
         return this.getCoord() + " : " + this.getFormule()+ " = " + value;
+
     }
 
     @Override
